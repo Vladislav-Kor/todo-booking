@@ -3,11 +3,7 @@
 namespace app\controllers;
 
 use Yii;
-use yii\web\Response;
 use yii\web\Controller;
-use yii\filters\VerbFilter;
-use yii\filters\AccessControl;
-use yii\web\NotFoundHttpException;
 
 class SiteController extends Controller
 {
@@ -51,10 +47,8 @@ class SiteController extends Controller
             $actions = Yii::$app->request->post('actions', []);
             $items = Yii::$app->request->post('items', []);
             $personalList = include Yii::getAlias('@app/data/personalList.php');
-            $employeeSchedules = include Yii::getAlias('@app/data/employeeSchedules.php');
             $serviceList = include Yii::getAlias('@app/data/serviceList.php');
-            $serviceSchedules = include Yii::getAlias('@app/data/serviceSchedules.php');
-            $plannedSchedule = include Yii::getAlias('@app/data/plannedSchedule.php');
+           
             var_dump($actions);
             switch ($actions) {
                 case 'service':

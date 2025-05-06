@@ -2,8 +2,7 @@
 namespace app\controllers;
 use Yii;
 use yii\web\Controller;
-use addServiceToSchedule;
-use app\models\generateEmployeeTimeSlotsToDo;
+use app\models\EmpSlots\generateEmployeeTimeSlotsToDo;
 
 class ScheduleController  extends Controller
 {
@@ -84,7 +83,7 @@ class ScheduleController  extends Controller
         // Формируем список слотов для выбранного специалиста и услуги
         $slots = [];
         if ($stage === 'time' && $selectedService && $selectedPersonal) {
-            $generator = new \app\models\generateEmployeeTimeSlotsToDo(
+            $generator = new generateEmployeeTimeSlotsToDo(
                 $employeeSchedules, $personalList, $serviceList, $serviceSchedules, $plannedSchedule
             );
             $slots = $generator->getSlotsArray($selectedPersonal, $selectedService, 1800);
