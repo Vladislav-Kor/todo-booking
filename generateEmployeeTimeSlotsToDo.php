@@ -1,5 +1,5 @@
 <?php
-namespace app\models;
+
 // Класс для генерации свободных временных слотов сотрудника с учётом расписания и занятости
 
 use function PHPSTORM_META\type;
@@ -177,7 +177,7 @@ class generateEmployeeTimeSlotsToDo {
 
             // Если слот занят, сдвигаем время начала на конец занятости
             if ($occupiedService !== null) {
-                $current = max($current, $occupiedService["end"]);
+                $current = max($current, $occupiedService);
                 continue;
             }
 
@@ -196,14 +196,10 @@ class generateEmployeeTimeSlotsToDo {
     }
 
     // Проверка занятости слота, возвращает данные о занятой услуге или null
-    private function checkSlotOccupation(int $employeeId, int $slotStart, int $slotEnd, array $brunch): ?array {
+    private function checkSlotOccupation(int $employeeId, int $slotStart, int $slotEnd, array $brunch): ?int {
         // Сначала проверяем, не попадает ли слот в обед
         if ($brunchEnd = $this->isSlotInBrunch($slotStart, $slotEnd, $brunch)) {
-            return [
-                "name" => "Обед",
-                "start" => $slotStart,
-                "end" => $brunchEnd,
-            ];
+            return $brunchEnd;
         }
 
         foreach ($this->serviceSchedules as $srv) {
@@ -214,13 +210,9 @@ class generateEmployeeTimeSlotsToDo {
             // Проверяем пересечение с занятыми услугами
             if ($serviceStart < $slotEnd && $serviceEnd > $slotStart) {
                 $service = $this->findService($srv["service_id"]);
-                if ($service["plannedSchedule"] && $service["maxPeople"] < ++$service["maxPeople"]) {
-                    return [
-                        "name" => $service["name"],
-                        "start" => $serviceStart,
-                        "end" => $serviceEnd,
-                    ];
-                }
+                // if ($service["plannedSchedule"] && $service["maxPeople"] < ++$service["maxPeople"]) {
+                    return $serviceEnd;
+                // }
             }
         }
         return null;
@@ -252,59 +244,5 @@ class generateEmployeeTimeSlotsToDo {
             }
             echo "\n";
         }
-    }
-
-    public function getFreeSlotsByDay($employeeName, $serviceName, $timeStep = 1800) {
-        $employee = $this->findEmployeeByName($employeeName);
-        if (!$employee) return [];
-        $service = $this->findService($serviceName);
-        if (!$service) return [];
-        $roundedTimestamp = $this->getRoundedCurrentTimestamp($timeStep);
-        $duration = (int)$service["date"];
-        $employeeSchedules = $this->getEmployeeSchedules($employee["id"]);
-        $result = [];
-    
-        foreach ($employeeSchedules as $schedule) {
-            if (!$service["plannedSchedule"]) {
-                $slots = $this->generateSlotsForSchedule(
-                    $schedule, $roundedTimestamp, $duration, $timeStep, $employee["id"]
-                );
-            } else {
-                $slots = $this->generateSlotsForPlannedSchedule(
-                    $schedule, $roundedTimestamp, $service
-                );
-            }
-            foreach ($slots as $slot) {
-                $date = substr($slot['slot_start'], 0, 10); // 'YYYY-MM-DD'
-                $result[$date][] = $slot;
-            }
-        }
-        ksort($result);
-        return $result; // ['2025-05-05' => [...], ...]
-    }
-
-    public function getSlotsArray($employeeName, $serviceName, int $timeStep) {
-        $employee = $this->findEmployeeByName($employeeName);
-        if (!$employee) return [];
-        $service = $this->findService($serviceName);
-        if (!$service) return [];
-        $roundedTimestamp = $this->getRoundedCurrentTimestamp($timeStep);
-        $duration = (int)$service["date"];
-        $employeeSchedules = $this->getEmployeeSchedules($employee["id"]);
-        $result = [];
-        foreach ($employeeSchedules as $schedule) {
-            if (!$service["plannedSchedule"]) {
-                $slots = $this->generateSlotsForSchedule(
-                    $schedule, $roundedTimestamp, $duration, $timeStep, $employee["id"]
-                );
-                $result = array_merge($result, $slots);
-            } else {
-                $slots = $this->generateSlotsForPlannedSchedule(
-                    $schedule, $roundedTimestamp, $service
-                );
-                $result = array_merge($result, $slots);
-            }
-        }
-        return $result;
     }
 }
