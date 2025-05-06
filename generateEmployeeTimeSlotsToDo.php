@@ -171,23 +171,26 @@ class generateEmployeeTimeSlotsToDo {
         while ($current <= $workEnd) {
             $slotStart = $current;
             $slotEnd = $slotStart + $duration;
-
+            $servicesStatus = '';
             // Проверяем занятость слота
             $occupiedService = $this->checkSlotOccupation($employeeId, $slotStart, $slotEnd, $brunch);
-
+            
             // Если слот занят, сдвигаем время начала на конец занятости
             if ($occupiedService !== null) {
-                $current = max($current, $occupiedService);
-                continue;
+                $slotStart = max($current, $occupiedService['end']);
+                // $servicesStatus = $occupiedService['name'];
+                // $current += $timeStep;
+                // continue;
             }
-
-            // Добавляем слот в результат
-            $slots[] = [
-                "slot_start" => date("Y-m-d H:i", $slotStart),
-                "slot_end" => date("Y-m-d H:i", $slotEnd),
-                "services" => "",
-            ];
-
+            $slotStarts = array_column($slots, 'slot_start');
+            if (!in_array(date("Y-m-d H:i", $slotStart), $slotStarts)) {
+                // Добавляем слот в результат
+                $slots[] = [
+                    "slot_start" => date("Y-m-d H:i", $slotStart),
+                    "slot_end" => date("Y-m-d H:i", $slotEnd),
+                    "services" => $servicesStatus,
+                ];
+            }
             // Переходим к следующему слоту
             $current += $timeStep;
         }
@@ -196,10 +199,13 @@ class generateEmployeeTimeSlotsToDo {
     }
 
     // Проверка занятости слота, возвращает данные о занятой услуге или null
-    private function checkSlotOccupation(int $employeeId, int $slotStart, int $slotEnd, array $brunch): ?int {
+    private function checkSlotOccupation(int $employeeId, int $slotStart, int $slotEnd, array $brunch): ?array {
         // Сначала проверяем, не попадает ли слот в обед
         if ($brunchEnd = $this->isSlotInBrunch($slotStart, $slotEnd, $brunch)) {
-            return $brunchEnd;
+            return [
+                "name" => 'обед',
+                "end" => $brunchEnd,
+            ];
         }
 
         foreach ($this->serviceSchedules as $srv) {
@@ -211,7 +217,11 @@ class generateEmployeeTimeSlotsToDo {
             if ($serviceStart < $slotEnd && $serviceEnd > $slotStart) {
                 $service = $this->findService($srv["service_id"]);
                 // if ($service["plannedSchedule"] && $service["maxPeople"] < ++$service["maxPeople"]) {
-                    return $serviceEnd;
+                    return [
+                        "name" => $service["name"],
+                        "start" => $serviceStart,
+                        "end" => $serviceEnd,
+                    ];
                 // }
             }
         }
@@ -236,7 +246,7 @@ class generateEmployeeTimeSlotsToDo {
     // Вывод слотов в консоль
     private function printSlots(array $slots): void {
         foreach ($slots as $slot) {
-            echo " C " . $slot["slot_start"] . " По " . $slot["slot_end"];
+            echo " C " . $slot["slot_start"] /*. " По " . $slot["slot_end"]*/;
             if ($slot["services"] !== "") {
                 echo " - занято - услугой: " . $slot["services"];
             } else {
