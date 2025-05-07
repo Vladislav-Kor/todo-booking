@@ -101,6 +101,7 @@ class addServiceToSchedule {
             return $this->listServiceSchedules__construct;
         } else {
             echo "Ошибка: сотрудник занят\n";
+            return $this->listServiceSchedules__construct;
         }
         
     }
