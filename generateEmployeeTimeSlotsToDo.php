@@ -1,9 +1,10 @@
 <?php
-
-// Класс для генерации свободных временных слотов сотрудника с учётом расписания и занятости
 include "generateSlotsForSchedule.php";
-include "generateSlotsForSchedule.php";
+include "generateSlotsForPlannedSchedule.php";
 
+/**
+ *  генерация свободных временных слотов сотрудника с учётом расписания и занятости
+ */
 class generateEmployeeTimeSlotsToDo {
     // Приватные свойства для хранения данных
     private $employeeSchedules; // Расписания сотрудников
@@ -53,7 +54,7 @@ class generateEmployeeTimeSlotsToDo {
         return null;
     }
     
-    public function getTodoInDosty($employeeName, $serviceName, int $timeStep) {
+    public function getTodoInDosty(string $employeeName, string $serviceName, int $timeStep, int $peopleCount) {
         // 1. Поиск сотрудника и услуги
         $employee = $this->findEmployeeByName($employeeName);
         if (!$employee) {
@@ -64,12 +65,12 @@ class generateEmployeeTimeSlotsToDo {
         if (!$service) {
             echo "Услуга не найдена\n";
             return "Услуга не найдена";}
-    
+        
         // 2. Получаем текущий округленный timestamp
         $roundedTimestamp = $this->getRoundedCurrentTimestamp($timeStep);
     
         // 3. Получаем длительность услуги в секундах
-        $duration = (int)$service["date"];
+        $duration = (int)$service["duration"];
     
         // 4. Получаем расписание сотрудника
         $employeeSchedules = $this->getEmployeeSchedules($employee["id"]);
@@ -77,9 +78,17 @@ class generateEmployeeTimeSlotsToDo {
         // 5. Генерируем слоты по каждому интервалу рабочего времени
         $result = [];
         foreach ($employeeSchedules as $schedule) {
-            if (!$service["plannedSchedule"]) {
+            if ($service["plannedSchedule"]) {
+                $model = new generateSlotsForPlannedSchedule($this->plannedSchedule, $this->serviceSchedules);
+                $slots = $model->get(
+                    $schedule, // график сотрудника
+                    $roundedTimestamp, // текущий округленный временной шаг
+                    $service, // услуга,
+                    $peopleCount // колличество мест для бронирования
+                );
+            } else {
                 $model = new generateSlotsForSchedule($this->serviceList, $this->serviceSchedules);
-                $slots = $model->generateSlotsForSchedule(
+                $slots = $model->get(
                     $schedule, // график сотрудника
                     $roundedTimestamp, // текущий округленный временной шаг
                     $duration, // период исполнения услуги
@@ -87,17 +96,8 @@ class generateEmployeeTimeSlotsToDo {
                     $employee["id"], // сотрудник
                     $service["name"]
                 );
-                $result = array_merge($result, $slots);
-            } else {
-                $model = new generateSlotsForPlannedSchedule($this->plannedSchedule);
-                $slots = $model->generateSlotsForPlannedSchedule(
-                    $schedule, // график сотрудника
-                    $roundedTimestamp, // текущий округленный временной шаг
-                    $service // услуга
-                );
-                
-                $result = array_merge($result, $slots);
             }
+            $result = array_merge($result, $slots);
         } 
         
         // 6. Выводим результат
@@ -125,6 +125,7 @@ class generateEmployeeTimeSlotsToDo {
 
     // Вывод слотов в консоль
     private function printSlots(array $slots): void {
+        // if(!empty($slots)){
         foreach ($slots as $slot) {
             echo " C " . $slot["start_datetime"] . " По " . $slot["end_datetime"];
             if ($slot["name"] !== "") {
@@ -133,6 +134,7 @@ class generateEmployeeTimeSlotsToDo {
                 echo " - свободно";
             }
             echo "\n";
-        }
+        }//}
+        // print_r($slots);
     }
 }

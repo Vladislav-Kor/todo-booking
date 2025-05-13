@@ -96,13 +96,13 @@ $scheduleResource = [
 ];
 
 $modelGenirateEmployeeSchedules = new genirateEmployeeSchedules();
-$listEmployeeSchedules = $modelGenirateEmployeeSchedules->get(3);
+$listEmployeeSchedules = $modelGenirateEmployeeSchedules->get(30);
 
 $listService = [
     [
         "id"=>2,
         "name"=>"Масаж пяток",
-        "date" => 80 * 60,
+        "duration" => 80 * 60,
         "plannedSchedule" => false,
         "maxPeople" => 1,
         'defaltPrice' => 1600,
@@ -120,7 +120,7 @@ $listService = [
     [
         "id"=>1,
         "name"=>"Масаж Головы",
-        "date" => 60 * 60,
+        "duration" => 60 * 60,
         "plannedSchedule" => false,
         "maxPeople" => 1,
         'defaltPrice' => 1600,
@@ -129,7 +129,7 @@ $listService = [
     [
         "id"=>3,
         "name"=>"Масаж спины",
-        "date" => 40 * 60,
+        "duration" => 40 * 60,
         "plannedSchedule" => false,
         "maxPeople" => 1,
         'defaltPrice' => 1600,
@@ -147,7 +147,7 @@ $listService = [
     [
         "id"=>4,
         "name"=>"Лечебный массаж",
-        "date" => 20 * 60,
+        "duration" => 20 * 60,
         "plannedSchedule" => false,
         "maxPeople" => 1,
         'defaltPrice' => 1600,
@@ -165,7 +165,7 @@ $listService = [
     [
         "id"=>5,
         "name"=>"Масаж шеи",
-        "date" => 15 * 60,
+        "duration" => 15 * 60,
         "plannedSchedule" => false,
         "maxPeople" => 1,
         'defaltPrice' => 1600,
@@ -174,7 +174,7 @@ $listService = [
     [
         "id"=>7,
         "name"=>"Ароматический масляный массаж",
-        "date" => 45 * 60,
+        "duration" => 45 * 60,
         "plannedSchedule" => false,
         "maxPeople" => 1,
         'defaltPrice' => 1600,
@@ -183,7 +183,7 @@ $listService = [
     [
         "id"=>8,
         "name"=>"Шиацу",
-        "date" => 35 * 60,
+        "duration" => 35 * 60,
         "plannedSchedule" => false,
         "maxPeople" => 1,
         'defaltPrice' => 1600,
@@ -192,30 +192,30 @@ $listService = [
     [
         "id"=>9,
         "name"=>"Массаж травяными мешочками",
-        "date" => 55 * 60,
+        "duration" => 55 * 60,
         "plannedSchedule" => false,
         "maxPeople" => 1,
         'defaltPrice' => 1600,
         'specPrice' => []
     ],
-    // [
-    //     "id"=>6,
-    //     "name"=>"Фестиваль масажа",
-    //     "date" => (60*3) * 60,
-    //     "plannedSchedule" => true,
-    //     "maxPeople" => 2,
-    //     'defaltPrice' => 1600,
-    //     'specPrice' => [
-    //         [
-    //             'id'=>2,
-    //             'price' => 1800
-    //         ],
-    //         [
-    //             'id'=>3,
-    //             'price' => 1400
-    //         ]
-    //     ]
-    // ]
+    [
+        "id"=>6,
+        "name"=>"Фестиваль масажа",
+        "duration" => (60*3) * 60,
+        "plannedSchedule" => true,
+        "maxPeople" => 2,
+        'defaltPrice' => 1600,
+        'specPrice' => [
+            [
+                'id'=>2,
+                'price' => 1800
+            ],
+            [
+                'id'=>3,
+                'price' => 1400
+            ]
+        ]
+    ]
 ];
 
 $plannedSchedule = [
@@ -223,37 +223,31 @@ $plannedSchedule = [
         "service_id"=>6,
         "start_datetime" => "2025-05-30 10:30",
         "end_datetime" => "2025-05-30 13:30",
-        "people" => 2
     ],
     [
         "service_id"=>6,
         "start_datetime" => "2025-05-27 16:00",
         "end_datetime" => "2025-05-27 18:00",
-        "people" => 2
     ],
     [
         "service_id"=>6,
         "start_datetime" => "2025-05-29 10:30",
         "end_datetime" => "2025-05-29 13:30",
-        "people" => 2
     ],
     [
         "service_id"=>6,
         "start_datetime" => "2025-05-29 16:00",
         "end_datetime" => "2025-05-29 18:00",
-        "people" => 2
     ],
     [
         "service_id"=>6,
         "start_datetime" => "2025-05-29 10:30",
         "end_datetime" => "2025-05-29 13:30",
-        "people" => 2
     ],
     [
         "service_id"=>6,
         "start_datetime" => "2025-05-30 16:00",
         "end_datetime" => "2025-05-30 18:00",
-        "people" => 2
     ]
 ];
 
@@ -266,7 +260,7 @@ $listServiceSchedules = [
     //         "start_datetime" => "2025-04-27 10:45:00",
     //         "end_datetime" => "2025-04-27 11:30:00",
     //         "status" => "запланировано",
-    //         "resource" => 1
+    //         "peopleCount" => 1,
     //     ],
     // 1 => 
     //     [
@@ -276,7 +270,7 @@ $listServiceSchedules = [
     //         "start_datetime" => "2025-04-25 16:25:00",
     //         "end_datetime" => "2025-04-25 16:35:00",
     //         "status" => "запланировано",
-    //         "resource" => 2
+    //         "peopleCount" => 2
     //     ]    
 ];
 
@@ -376,7 +370,7 @@ while($active){
 
     // Аналогично для услуг
     foreach ($listService as $index => $service) {
-        echo ($index + 1) . ". " . $service["name"] . " " . ($service["date"] / 60) . " минут\n";
+        echo ($index + 1) . ". " . $service["name"] . " " . ($service["duration"] / 60) . " минут\n";
     }
     echo "Введите номер услуги: ";
     $serviceIndex = (int)trim(fgets(STDIN)) - 1;
@@ -386,6 +380,11 @@ while($active){
         echo "Некорректный выбор услуги\n";
         exit;
     }
+    $peopleCount = 1;
+    if ($listService[$serviceIndex]["plannedSchedule"]) {
+        echo "\nВведите колличество броний: ";
+        $peopleCount = (int)trim(fgets(STDIN));
+    }
 
     echo "Вы выбрали сотрудника: $employeeName\n";
     echo "а услугу вы выбрали: $serviceName\n";
@@ -394,7 +393,7 @@ while($active){
     // $result = $toDoList->splitEmployeeScheduleWithServices($employeeName);
 
     ### записаться на прием
-    $generateToDoList->getTodoInDosty(trim($employeeName), trim($serviceName), (int)$timeStep);
+    $generateToDoList->getTodoInDosty(trim($employeeName), trim($serviceName), (int)$timeStep, $peopleCount);
 
 
     echo "\nВведите Выбранное время: ";
@@ -403,7 +402,7 @@ while($active){
         break;
     }
     ### записаться на услугу к мастеру
-    $listServiceSchedules = $toDoListadd->add($employeeName, $serviceName, $date);
+    $listServiceSchedules = $toDoListadd->add($employeeName, $serviceName, $date, $peopleCount);
     
     echo "\nЗаписаться еще раз : ";
     $active = trim(fgets(STDIN));

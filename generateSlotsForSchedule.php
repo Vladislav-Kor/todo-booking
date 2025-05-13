@@ -1,4 +1,7 @@
 <?php
+/**
+ * Формирование расписания услуг на основании графика специалиста
+ */
 class generateSlotsForSchedule {
     // Приватные свойства для хранения данных
     private $serviceList;        // Список услуг
@@ -9,7 +12,6 @@ class generateSlotsForSchedule {
         $this->serviceList = $serviceList;
         $this->serviceSchedules = $serviceSchedules;
     }
-
     
     // Поиск услуги по названию в списке услуг
     private function findService($params) {
@@ -34,7 +36,7 @@ class generateSlotsForSchedule {
     }
 
     // Генерация временных слотов для одного рабочего интервала
-    public function generateSlotsForSchedule(array $schedule, int $startTime, int $duration, int $timeStep, int $employeeId, $name): array {
+    public function get(array $schedule, int $startTime, int $duration, int $timeStep, int $employeeId, $name): array {
         // времяные ячеейки
         $slots = [];
         // расписание сотрудника
@@ -48,7 +50,6 @@ class generateSlotsForSchedule {
         $slotStart = $current;
         $slotEnd = $slotStart + $duration;
         while ($current <= $workEnd) {
-           
             // Проверяем занятость слота
             $occupiedService = $this->checkSlotOccupation($employeeId, $slotStart, $slotEnd, $arraySchedules);
 

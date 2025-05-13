@@ -6,23 +6,38 @@
  * в графике его расписания рабочего дня
  */
 class addServiceToSchedule {
-    private $listemployeeSchedules__construct;
-    private $listPersonal__construct;
-    private $listService__construct;
-    private $listServiceSchedules__construct;
+    private $listemployeeSchedules__construct; // Расписание сотрудников
+    private $listPersonal__construct;          // Список сотрудников
+    private $listService__construct;           // Список услуг
+    private $listServiceSchedules__construct;  // Существующие записи
 
-    public function __construct($employeeSchedules, $listPersonal, $listService, $listServiceSchedules) {
+    public function __construct(
+        $employeeSchedules,  // График работы сотрудников
+        $listPersonal,       // Профили мастеров
+        $listService,        // Услуги салона
+        $listServiceSchedules // Активные записи
+    ) {
         $this->listemployeeSchedules__construct = $employeeSchedules;
         $this->listPersonal__construct = $listPersonal;
         $this->listService__construct = $listService;
         $this->listServiceSchedules__construct = $listServiceSchedules;
     }
 
-    function add($employeeName, $serviceName, $startDateTime)
+    /**
+     * Метод для добавления записи пользователя на услугу к мастеру
+     * 
+     * @param string $employeeName - имя сотрудника (мастера)
+     * @param string $serviceName - название услуги
+     * @param string $startDateTime - дата и время начала услуги (формат "Y-m-d H:i")
+     * @param int $peopleCount - количество человек (например, для групповых услуг)
+     * 
+     * @return array - обновлённый список записей на услуги
+     */
+    function add($employeeName, $serviceName, $startDateTime, $peopleCount)
     {
-        $success = true;
-        
-        // Поиск сотрудника
+        $success = true; // Флаг успешности операции
+
+        // 1. Поиск сотрудника по имени в списке персонала
         $employee = null;
         foreach ($this->listPersonal__construct as $person) {
             if ($person["name"] === $employeeName) {
@@ -31,10 +46,12 @@ class addServiceToSchedule {
             }
         }
         if (!$employee) {
-            echo "Ошибка: сотредник не найден\n";
+            // Если сотрудник не найден - выводим ошибку и помечаем неуспех
+            echo "Ошибка: сотрудник не найден\n";
             $success = false;
         }
-        // Поиск услуги
+
+        // 2. Поиск услуги по названию в списке услуг
         $service = null;
         foreach ($this->listService__construct as $srv) {
             if ($srv["name"] === $serviceName) {
@@ -43,29 +60,53 @@ class addServiceToSchedule {
             }
         }
         if (!$service) {
-            echo "Ошибка: услуга не найдела\n";
+            // Если услуга не найдена - выводим ошибку и помечаем неуспех
+            echo "Ошибка: услуга не найдена\n";
             $success = false;
         }
+
+        // 3. Преобразование даты и времени начала в timestamp
         $startTimestamp = strtotime($startDateTime);
         if ($startTimestamp === false) {
+            // Если дата некорректна - помечаем ошибку
+            echo "Ошибка: неверный формат даты и времени\n";
             $success = false;
         }
-        // Преобразуем длительность услуги в секунды
-        $serviceDurationSeconds = (int)$service["date"];
-        $endTimestamp = $startTimestamp + $serviceDurationSeconds;
+
+        // 4. Получение длительности услуги в секундах
+        $serviceDuration = (int)$service["duration"]; 
+
+        // Вычисляем время окончания услуги
+        $endTimestamp = $startTimestamp + $serviceDuration;
         $endDateTime = date("Y-m-d H:i", $endTimestamp);
 
+        // 5. Проверка занятости сотрудника на выбранное время
+        // Перебираем расписание сотрудника (график работы)
         foreach ($this->listemployeeSchedules__construct as $key) {
             if ($key["employee_id"] === $employee["id"]) {
+                // Если есть уже существующие записи на услуги у этого сотрудника
                 if (!empty($this->listServiceSchedules__construct)) {
                     foreach ($this->listServiceSchedules__construct as $serviceSchedules) {
                         if ($serviceSchedules["employee_id"] === $employee["id"]) {
-                            if (strtotime($startTimestamp) === strtotime($serviceSchedules["start_datetime"]) 
-                            || strtotime($endDateTime) === strtotime($serviceSchedules["end_datetime"]) 
-                            || strtotime($endDateTime) === strtotime($serviceSchedules["start_datetime"])
-                            || strtotime($startTimestamp) === strtotime($serviceSchedules["end_datetime"])
-                            ) {
-                                $success = false;
+                            // Проверяем, не пересекается ли новое время с уже существующими записями
+
+                            // Если услуга не запланирована заранее (plannedSchedule == false)
+                            if (!$service["plannedSchedule"]) {
+                                // Проверяем точные совпадения начала и конца
+                                if (
+                                    strtotime($startDateTime) === strtotime($serviceSchedules["start_datetime"]) ||
+                                    strtotime($endDateTime) === strtotime($serviceSchedules["end_datetime"]) ||
+                                    strtotime($endDateTime) === strtotime($serviceSchedules["start_datetime"]) ||
+                                    strtotime($startDateTime) === strtotime($serviceSchedules["end_datetime"])
+                                ) {
+                                    // Если время совпадает - помечаем ошибку
+                                    $success = false;
+                                }
+                            } else {
+                                // Если услуга запланирована заранее, проверяем максимальное количество людей
+                                if ($service["maxPeople"] < $peopleCount) {
+                                    $success = false;
+                                }
                             }
                         }
                     }
@@ -73,37 +114,30 @@ class addServiceToSchedule {
             }
         }
 
-        // Добавление записи в сервисное расписание
-        if (!empty($this->listServiceSchedules__construct)) {
-            $newId = count($this->listServiceSchedules__construct) + 1;
-            $this->listServiceSchedules__construct[] = [
-                "id" => $newId,
-                "employee_id" => $employee["id"],
-                "service_id" => $service["id"],
-                "start_datetime" => date("Y-m-d H:i", $startTimestamp),
-                "end_datetime" => $endDateTime,
-                "status" => "запланировано",
-            ];
-        } else {
-            $this->listServiceSchedules__construct[] = [
-                "id" => 1,
-                "employee_id" => $employee["id"],
-                "service_id" => $service["id"],
-                "start_datetime" => date("Y-m-d H:i", $startTimestamp),
-                "end_datetime" => $endDateTime,
-                "status" => "запланировано",
-            ];
-        }
-        
+        // 6. Если проверка прошла успешно - добавляем запись в расписание услуг
         if ($success) {
+            // Генерация ID для новой записи
+            $id = empty($this->listServiceSchedules__construct) ? 1 : count($this->listServiceSchedules__construct) + 1;
+
+            // Добавляем новую запись в массив расписания услуг
+            $this->listServiceSchedules__construct[] = [
+                "id" => $id,
+                "employee_id" => $employee["id"],
+                "service_id" => $service["id"],
+                "start_datetime" => date("Y-m-d H:i", $startTimestamp),
+                "end_datetime" => $endDateTime,
+                "status" => "запланировано",
+                "peopleCount" => $peopleCount
+            ];
+
             echo "График успешно обновлен!\n";
             print_r($this->listServiceSchedules__construct);
             return $this->listServiceSchedules__construct;
+
         } else {
-            echo "Ошибка: сотрудник занят\n";
+            // Если сотрудник занят или возникла другая ошибка
+            echo "Ошибка: сотрудник занят или данные некорректны\n";
             return $this->listServiceSchedules__construct;
         }
-        
     }
 }
-
