@@ -73,8 +73,30 @@ $listGroopsRightsAdmin = [
     ],
 ];
 
+$listResource = [
+    [
+        "id",
+        "name",
+        "maxPeople",
+        "servicies" => [],
+    ],
+];
+
+$listResource = [
+    [
+        "id",
+        "name",
+        "maxPeople",
+        "servicies" => [],
+    ],
+];
+
+$scheduleResource = [
+
+];
+
 $modelGenirateEmployeeSchedules = new genirateEmployeeSchedules();
-$listEmployeeSchedules = $modelGenirateEmployeeSchedules->get(2);
+$listEmployeeSchedules = $modelGenirateEmployeeSchedules->get(3);
 
 $listService = [
     [
@@ -124,7 +146,7 @@ $listService = [
     ],
     [
         "id"=>4,
-        "name"=>"BODY Масаж",
+        "name"=>"Лечебный массаж",
         "date" => 20 * 60,
         "plannedSchedule" => false,
         "maxPeople" => 1,
@@ -150,60 +172,87 @@ $listService = [
         'specPrice' => []
     ],
     [
-        "id"=>6,
-        "name"=>"Фестиваль масажа",
-        "date" => (60*3) * 60,
-        "plannedSchedule" => true,
-        "maxPeople" => 2,
+        "id"=>7,
+        "name"=>"Ароматический масляный массаж",
+        "date" => 45 * 60,
+        "plannedSchedule" => false,
+        "maxPeople" => 1,
         'defaltPrice' => 1600,
-        'specPrice' => [
-            [
-                'id'=>2,
-                'price' => 1800
-            ],
-            [
-                'id'=>3,
-                'price' => 1400
-            ]
-        ]
-    ]
+        'specPrice' => []
+    ],
+    [
+        "id"=>8,
+        "name"=>"Шиацу",
+        "date" => 35 * 60,
+        "plannedSchedule" => false,
+        "maxPeople" => 1,
+        'defaltPrice' => 1600,
+        'specPrice' => []
+    ],
+    [
+        "id"=>9,
+        "name"=>"Массаж травяными мешочками",
+        "date" => 55 * 60,
+        "plannedSchedule" => false,
+        "maxPeople" => 1,
+        'defaltPrice' => 1600,
+        'specPrice' => []
+    ],
+    // [
+    //     "id"=>6,
+    //     "name"=>"Фестиваль масажа",
+    //     "date" => (60*3) * 60,
+    //     "plannedSchedule" => true,
+    //     "maxPeople" => 2,
+    //     'defaltPrice' => 1600,
+    //     'specPrice' => [
+    //         [
+    //             'id'=>2,
+    //             'price' => 1800
+    //         ],
+    //         [
+    //             'id'=>3,
+    //             'price' => 1400
+    //         ]
+    //     ]
+    // ]
 ];
 
 $plannedSchedule = [
     [
         "service_id"=>6,
-        "start_datetime" => "2025-04-30 10:30",
-        "end_datetime" => "2025-04-30 13:30",
+        "start_datetime" => "2025-05-30 10:30",
+        "end_datetime" => "2025-05-30 13:30",
         "people" => 2
     ],
     [
         "service_id"=>6,
-        "start_datetime" => "2025-04-27 16:00",
-        "end_datetime" => "2025-04-27 18:00",
+        "start_datetime" => "2025-05-27 16:00",
+        "end_datetime" => "2025-05-27 18:00",
         "people" => 2
     ],
     [
         "service_id"=>6,
-        "start_datetime" => "2025-04-29 10:30",
-        "end_datetime" => "2025-04-29 13:30",
+        "start_datetime" => "2025-05-29 10:30",
+        "end_datetime" => "2025-05-29 13:30",
         "people" => 2
     ],
     [
         "service_id"=>6,
-        "start_datetime" => "2025-04-29 16:00",
-        "end_datetime" => "2025-04-29 18:00",
+        "start_datetime" => "2025-05-29 16:00",
+        "end_datetime" => "2025-05-29 18:00",
         "people" => 2
     ],
     [
         "service_id"=>6,
-        "start_datetime" => "2025-04-29 10:30",
-        "end_datetime" => "2025-04-29 13:30",
+        "start_datetime" => "2025-05-29 10:30",
+        "end_datetime" => "2025-05-29 13:30",
         "people" => 2
     ],
     [
         "service_id"=>6,
-        "start_datetime" => "2025-04-30 16:00",
-        "end_datetime" => "2025-04-30 18:00",
+        "start_datetime" => "2025-05-30 16:00",
+        "end_datetime" => "2025-05-30 18:00",
         "people" => 2
     ]
 ];
@@ -217,6 +266,7 @@ $listServiceSchedules = [
     //         "start_datetime" => "2025-04-27 10:45:00",
     //         "end_datetime" => "2025-04-27 11:30:00",
     //         "status" => "запланировано",
+    //         "resource" => 1
     //     ],
     // 1 => 
     //     [
@@ -226,6 +276,7 @@ $listServiceSchedules = [
     //         "start_datetime" => "2025-04-25 16:25:00",
     //         "end_datetime" => "2025-04-25 16:35:00",
     //         "status" => "запланировано",
+    //         "resource" => 2
     //     ]    
 ];
 
